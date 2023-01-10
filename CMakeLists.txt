@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14 CACHE STRING "Build for 10.11")
 
 project(ji-mts-source VERSION 0.9.0 LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
 
 include (cmake/CPM.cmake)
 

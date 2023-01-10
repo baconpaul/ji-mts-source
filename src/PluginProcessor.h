@@ -14,19 +14,13 @@
 #include "Tunings.h"
 #include <set>
 
-//==============================================================================
-/**
-*/
 
-class SimpleMTSMain;
-
-
-class SimpleMTSMain  : public juce::AudioProcessor
+class JIMTSSourceProcessor : public juce::AudioProcessor
 {
 public:
     //==============================================================================
-    SimpleMTSMain();
-    ~SimpleMTSMain();
+  JIMTSSourceProcessor();
+    ~JIMTSSourceProcessor();
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -81,5 +75,5 @@ private:
     bool registeredMTS{false};
     std::atomic<bool> repushTuning{false};
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleMTSMain)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JIMTSSourceProcessor)
 };

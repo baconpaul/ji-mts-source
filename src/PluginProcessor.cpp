@@ -11,11 +11,12 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "libMTSMaster.h"
+#include "JIMath.h"
 
 
 
 //==============================================================================
-SimpleMTSMain::SimpleMTSMain()
+JIMTSSourceProcessor::JIMTSSourceProcessor()
     : juce::AudioProcessor (juce::AudioProcessor::BusesProperties()
                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
         )
@@ -25,7 +26,27 @@ SimpleMTSMain::SimpleMTSMain()
     setKBM( "", false );
     retune();
 
-    if (MTS_CanRegisterMaster())
+    uint64_t n{1}, d{1};
+    JIMath jim;
+    for (int i=0; i<7; ++i)
+    {
+        std::cout << i << " " << n << " / " << d << std::endl;
+        auto res = jim.fracMul(n,d,3,2);
+        n = res.first;
+        d = res.second;
+    }
+
+    n = 1; d = 1;
+    for (int i=0; i<7; ++i)
+    {
+        std::cout << i << " " << n << " / " << d << std::endl;
+        auto res = jim.fracDiv(n,d,3,2);
+        n = res.first;
+        d = res.second;
+    }
+
+
+    if (false && MTS_CanRegisterMaster())
     {
         MTS_RegisterMaster();
         registeredMTS = true;
@@ -33,79 +54,79 @@ SimpleMTSMain::SimpleMTSMain()
     }
 }
 
-SimpleMTSMain::~SimpleMTSMain()
+JIMTSSourceProcessor::~JIMTSSourceProcessor()
 {
     if (registeredMTS)
         MTS_DeregisterMaster();
 }
 
 //==============================================================================
-const juce::String SimpleMTSMain::getName() const
+const juce::String JIMTSSourceProcessor::getName() const
 {
     return JucePlugin_Name;
 }
 
-bool SimpleMTSMain::acceptsMidi() const
+bool JIMTSSourceProcessor::acceptsMidi() const
 {
     return false;
 }
 
-bool SimpleMTSMain::producesMidi() const
+bool JIMTSSourceProcessor::producesMidi() const
 {
     return false;
 }
 
-bool SimpleMTSMain::isMidiEffect() const
+bool JIMTSSourceProcessor::isMidiEffect() const
 {
     return false;
 }
 
-double SimpleMTSMain::getTailLengthSeconds() const
+double JIMTSSourceProcessor::getTailLengthSeconds() const
 {
     return 0.0;
 }
 
-int SimpleMTSMain::getNumPrograms()
+int JIMTSSourceProcessor::getNumPrograms()
 {
     return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
                 // so this should be at least 1, even if you're not really implementing programs.
 }
 
-int SimpleMTSMain::getCurrentProgram()
+int JIMTSSourceProcessor::getCurrentProgram()
 {
     return 0;
 }
 
-void SimpleMTSMain::setCurrentProgram (int index)
+void JIMTSSourceProcessor::setCurrentProgram (int index)
 {
 }
 
-const juce::String SimpleMTSMain::getProgramName (int index)
+const juce::String JIMTSSourceProcessor::getProgramName (int index)
 {
     return {};
 }
 
-void SimpleMTSMain::changeProgramName (int index, const juce::String& newName)
+void JIMTSSourceProcessor::changeProgramName (int index, const juce::String& newName)
 {
 }
 
 //==============================================================================
-void SimpleMTSMain::prepareToPlay (double sampleRate, int samplesPerBlock)
+void JIMTSSourceProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
 }
 
-void SimpleMTSMain::releaseResources()
+void JIMTSSourceProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
 }
 
-bool SimpleMTSMain::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool JIMTSSourceProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
     return true;
 }
 
-void SimpleMTSMain::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+void JIMTSSourceProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     if (!registeredMTS)
         return;
@@ -116,18 +137,18 @@ void SimpleMTSMain::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
 }
 
 //==============================================================================
-bool SimpleMTSMain::hasEditor() const
+bool JIMTSSourceProcessor::hasEditor() const
 {
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-juce::AudioProcessorEditor* SimpleMTSMain::createEditor()
+juce::AudioProcessorEditor*JIMTSSourceProcessor::createEditor()
 {
-    return new SimpleMTSMainEditor (*this);
+    return new JIMTSSourceEditor(*this);
 }
 
 //==============================================================================
-void SimpleMTSMain::getStateInformation (juce::MemoryBlock& destData)
+void JIMTSSourceProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto xml = std::make_unique<juce::XmlElement>("state");
 
@@ -141,7 +162,7 @@ void SimpleMTSMain::getStateInformation (juce::MemoryBlock& destData)
     copyXmlToBinary (*xml, destData);
 }
 
-void SimpleMTSMain::setStateInformation (const void* data, int sizeInBytes)
+void JIMTSSourceProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     std::unique_ptr<juce::XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
 
@@ -186,21 +207,21 @@ void SimpleMTSMain::setStateInformation (const void* data, int sizeInBytes)
 }
 
 
-void SimpleMTSMain::setSCL( juce::String SCL, bool dretune )
+void JIMTSSourceProcessor::setSCL( juce::String SCL, bool dretune )
 {
     currentSCLString = SCL;
     if( dretune )
         retune();
 }
 
-void SimpleMTSMain::setKBM( juce::String KBM, bool dretune )
+void JIMTSSourceProcessor::setKBM( juce::String KBM, bool dretune )
 {
     currentKBMString = KBM;
     if( dretune )
         retune();
 }
 
-void SimpleMTSMain::retune() {
+void JIMTSSourceProcessor::retune() {
     try
     {
         if (currentKBMString.isEmpty())
@@ -227,5 +248,5 @@ void SimpleMTSMain::retune() {
 // This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new SimpleMTSMain();
+    return new JIMTSSourceProcessor();
 }
